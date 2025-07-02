@@ -269,3 +269,84 @@ src/
 ## ライセンス
 
 MIT
+
+
+
+
+
+
+
+## 編集履歴
+
+### 2024-07-02: アーキテクチャリファクタリング & エンティティ管理機能の完成
+
+#### 主要な変更内容
+
+**1. データ構造の改善**
+- Entity クラスにテキスト内容を格納する機能を追加 (`text` プロパティ)
+- エンティティIDをUUID v7形式に変更（タイムスタンプベースから移行）
+- JSON形式でのエンティティデータ管理（`new Entity()` コンストラクタ形式から移行）
+
+**2. アーキテクチャの分離**
+- `useEntityCRUD` composable を実装してエンティティのCRUD操作を統合
+- `useDialogState` composable でダイアログ状態管理を分離
+- `EntityDialogs.vue` コンポーネントを作成してダイアログUI要素を分離
+- App.vue から useEntityCRUD ロジックを VAnnotator.vue に移動
+
+**3. Vue 3 準拠への修正**
+- v-model エラーの修正（props でのv-model使用禁止への対応）
+- `:model-value` と `@update:model-value` パターンに変更
+- TypeScript型エラーの修正（undefined entities配列の処理）
+
+**4. データフロー最適化**
+- 親子コンポーネント間でのエンティティデータ同期システム構築
+- `update:entitiesData` イベントによる双方向データバインディング
+- 無限再帰更新の防止機構（`isUpdatingFromProp` フラグ）
+
+**5. UI/UX改善**
+- テキスト選択によるエンティティ追加機能
+- 既存エンティティのクリック編集機能
+- 右クリックによるエンティティ削除機能
+- エンティティ範囲調整機能（前後の文字追加/削除）
+- `rightOffeset` プロパティの外部制御対応（スライダーUI付き）
+
+#### 技術的詳細
+
+**コンポーネント構成:**
+- **VAnnotator.vue**: メイン注釈コンポーネント（useEntityCRUD統合済み）
+- **EntityDialogs.vue**: エンティティ操作用ダイアログ群
+- **App.vue**: デモページ（シンプル化、データ定義のみ）
+
+**Composables:**
+- **useEntityCRUD.ts**: エンティティのCRUD操作とダイアログ制御
+- **useDialogState.ts**: ダイアログの表示状態管理
+
+**データモデル:**
+```typescript
+interface EntityData {
+  id: string | number  // UUID v7推奨
+  startOffset: number
+  endOffset: number
+  label: number
+  text: string
+  user?: number
+}
+```
+
+#### 修正された問題
+- Vue 3 v-model props エラー
+- Entity 配列の undefined 参照エラー
+- 削除機能の無限再帰更新エラー
+- テキスト選択時のダイアログ表示問題
+- 親子コンポーネント間のデータ同期問題
+
+
+
+
+
+
+
+## 今後の予定
+
+* relation関連の機能を追加
+

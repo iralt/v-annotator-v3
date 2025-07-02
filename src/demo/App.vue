@@ -51,6 +51,7 @@ const maxLabelLength = ref(10);
 const allowOverlapping = ref<boolean>(true);
 const graphemeMode = ref<boolean>(false);
 const rtl = ref<boolean>(false);
+const rightOffeset = ref<number>(50);
 
 const selectedEntities = computed(() => {
   return [];
@@ -95,6 +96,7 @@ const relationLabels = reactive([
                   :rtl="rtl"
                   :dark="false"
                   :edit-flag="true"
+                  :right-offeset="rightOffeset"
                   @update:entitiesData="entitiesData = $event"
                 />
               </v-card-text>
@@ -166,6 +168,17 @@ const relationLabels = reactive([
                         density="compact"
                         hide-details
                       />
+                      <div class="mt-3">
+                        <v-slider
+                          v-model="rightOffeset"
+                          label="右余白"
+                          :min="0"
+                          :max="200"
+                          :step="10"
+                          thumb-label
+                          density="compact"
+                        />
+                      </div>
                     </v-list-item-subtitle>
                   </v-list-item>
                 </v-list>

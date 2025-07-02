@@ -59,6 +59,7 @@ interface VAnnotatorProps {
   dark: boolean;
   selectedEntities: Entity[];
   editFlag: boolean;
+  rightOffeset?: number;
 }
 
 interface VirtualScrollItem {
@@ -84,6 +85,7 @@ const props = withDefaults(defineProps<VAnnotatorProps>(), {
   dark: false,
 
   editFlag: false,
+  rightOffeset: 50,
 });
 
 // 親から呼ばれるメソッドを公開
@@ -228,7 +230,6 @@ const relationList = computed((): RelationList => {
   return new RelationList(props.relations, entityList.value);
 });
 
-const rightOffeset: Ref<number> = ref(50);
 
 const textLines = computed((): TextLine[] => {
   console.log("Computing textLines...");
@@ -246,7 +247,7 @@ const textLines = computed((): TextLine[] => {
     const maxLabelWidth = entityLabelList.value.maxLabelWidth;
     // console.log('Max Label Width:', maxLabelWidth);
     const calculator = new LineWidthManager(
-      maxWidth.value + rightOffeset.value,
+      maxWidth.value + props.rightOffeset,
       maxLabelWidth
     );
     const splitter = new TextLineSplitter(calculator, font.value);
