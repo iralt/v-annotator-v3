@@ -2,8 +2,6 @@
 SVGマーカーの定義:
 コンポーネントはSVG要素を使用してカスタムマーカー（矢印など）を定義しています。これはテキスト内の関係を視覚的に示すために使用されることがあります。
 
-RecycleScrollerの使用:
-vue-virtual-scroller を使用して、パフォーマンスを向上させるために画面上に表示されるアイテムの数を最小限に抑えながら、多数のテキストラインをスクロール可能なリストとして表示しています。
 各アイテム（テキストライン）は v-line コンポーネントを使って表示され、それぞれのテキストラインに対応するエンティティや関係のデータを渡しています。
 
 イベントハンドリング:
@@ -16,10 +14,6 @@ import { v7 as uuidv7 } from "uuid";
 // @ts-ignore
 import VLine from "@/components/Vline.vue";
 import EntityDialogs from "@/components/EntityDialogs.vue";
-// MTODO 他のを探さないといけない vue-virtual-scrollerは使えない？
-//// import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
-//// import { RecycleScroller } from 'vue-virtual-scroller';
-// import { VirtualScroller } from 'vue3-virtual-scroller'
 
 // import { Text, Label, Entity, Relation, Font, widthOf, TextLine, Entities, RelationList, LabelList, EntityLabelListItem, RelationLabelListItem, TextLineSplitter, LineWidthManager, TextSelector } from '@/domain';
 import { Text } from "@/composables/models/Label/Text";
@@ -67,6 +61,7 @@ interface VirtualScrollItem {
   textLine: TextLine;
   size: number;
 }
+
 
 const props = withDefaults(defineProps<VAnnotatorProps>(), {
   record: undefined,
@@ -148,32 +143,43 @@ const {
 } = useEntityCRUD(entitiesDataRef, textRef);
 
 // Watch for prop changes and update refs
-watch(() => props.entitiesData, (newEntitiesData) => {
-  isUpdatingFromProp.value = true;
-  entitiesDataRef.value = [...newEntitiesData];
-  nextTick(() => {
-    isUpdatingFromProp.value = false;
-  });
-}, { deep: true, immediate: true });
+watch(
+  () => props.entitiesData,
+  (newEntitiesData) => {
+    isUpdatingFromProp.value = true;
+    entitiesDataRef.value = [...newEntitiesData];
+    nextTick(() => {
+      isUpdatingFromProp.value = false;
+    });
+  },
+  { deep: true, immediate: true }
+);
 
-watch(() => props.text, (newText) => {
-  textRef.value = newText;
-});
+watch(
+  () => props.text,
+  (newText) => {
+    textRef.value = newText;
+  }
+);
 
 // Watch for internal entitiesData changes and emit to parent
-watch(entitiesDataRef, (newEntitiesData) => {
-  if (!isUpdatingFromProp.value) {
-    emits('update:entitiesData', [...newEntitiesData]);
-  }
-}, { deep: true });
+watch(
+  entitiesDataRef,
+  (newEntitiesData) => {
+    if (!isUpdatingFromProp.value) {
+      emits("update:entitiesData", [...newEntitiesData]);
+    }
+  },
+  { deep: true }
+);
 
 onMounted(() => {
   const element = document.getElementById(`text-${uuid}`);
   textElement.value = element as SVGTextElement | null;
   window.addEventListener("resize", setMaxWidth);
   setMaxWidth();
-  console.log("items:", items.value);
   console.log("Received text in VAnnotator:", props.text);
+  console.log("Virtual scroll items:", items.value);
 });
 
 watch(
@@ -189,22 +195,14 @@ watch(
 );
 
 const items = computed((): VirtualScrollItem[] => {
-  // console.log('Computing items...');
   if (!textLines.value || textLines.value.length === 0) {
-    // console.log('textLines is empty or undefined:', textLines.value);
     return [];
   }
 
-  // console.log(`Generating items from textLines, count: ${textLines.value.length}`);
   return textLines.value.map((line, i) => {
     const heightKey = `${line.startOffset}:${line.endOffset}`;
     const height = heights.value[heightKey] || 64;
-    console.log(
-      `Item ${i}: startOffset = ${line.startOffset}, endOffset = ${line.endOffset}, height = ${height}`
-    );
-
-    // 描画完了時に親コンポーネントへ通知
-    // emits('rendered');
+    
     return {
       id: heightKey,
       textLine: line,
@@ -216,7 +214,12 @@ const items = computed((): VirtualScrollItem[] => {
 const entityList = computed((): Entities => {
   resetSelection();
 
-  console.log("Computing entityList...", entities.value, "entitiesDataRef:", entitiesDataRef.value);
+  console.log(
+    "Computing entityList...",
+    entities.value,
+    "entitiesDataRef:",
+    entitiesDataRef.value
+  );
   // Ensure entities.value is always an array and contains valid Entity objects
   const entityArray = Array.isArray(entities.value) ? entities.value : [];
   console.log("Entity array to process:", entityArray);
@@ -229,7 +232,6 @@ const relationList = computed((): RelationList => {
   resetSelection();
   return new RelationList(props.relations, entityList.value);
 });
-
 
 const textLines = computed((): TextLine[] => {
   console.log("Computing textLines...");
@@ -416,14 +418,10 @@ function open(event: Event): void {
         </marker>
       </defs>
     </svg>
-    <v-virtual-scroll :items="items">
+    <v-virtual-scroll :items="items" item-height="64">
       <template v-slot:default="{ item, index }">
-        <!-- SSS -->
-        <!-- <div :id="`container-${uuid}`"> -->
-        <!-- AAAAA -->
-        <!-- <div :key="index"> -->
-        <!-- <p>{{ index }}: {{ item.textLine.startOffset }} - {{ item.textLine.endOffset }}</p> -->
         <v-line
+          :key="`${index}:${rtl}`"
           :annotator-uuid="uuid"
           :dark="dark"
           :entities="
@@ -450,7 +448,6 @@ function open(event: Event): void {
           :base-x="baseX"
           :left="left"
           :right="right"
-          :key="`${index}:${rtl}`"
           @click:entity="clicked"
           @click:relation="onRelationClicked"
           @contextmenu:entity="onEntityContextMenu"
@@ -459,9 +456,6 @@ function open(event: Event): void {
           @setSelectedEntity="selectedEntity = $event"
           @setSelectedRelation="selectedRelation = $event"
         />
-
-        <!-- </div> -->
-        <!-- </div> -->
       </template>
     </v-virtual-scroll>
     <!-- MMEMO SVG要素を非表示にするが、DOMには存在させるよう調整 -->
@@ -472,10 +466,12 @@ function open(event: Event): void {
     >
       <text :id="`text-${uuid}`" style="white-space: pre" />
     </svg>
-    
+
     <!-- Entity Dialogs -->
     <EntityDialogs
-      v-if="candidateEntity && (dialog4Adding || dialog4Updating || dialog4Deleting)"
+      v-if="
+        candidateEntity && (dialog4Adding || dialog4Updating || dialog4Deleting)
+      "
       :candidate-entity="candidateEntity"
       :entity-labels="entityLabels"
       :dialog4-adding="dialog4Adding"
@@ -487,7 +483,9 @@ function open(event: Event): void {
       @update-entity-subtract-prefix="updateEntitySubtractPrefix"
       @update-entity-add-suffix="updateEntityAddSuffix"
       @update-entity-subtract-suffix="updateEntitySubtractSuffix"
-      @update-candidate-entity-label="(value) => candidateEntity.label = value"
+      @update-candidate-entity-label="
+        (value) => (candidateEntity.label = value)
+      "
     />
   </div>
 </template>
