@@ -347,6 +347,8 @@ interface EntityData {
 - 削除機能の無限再帰更新エラー
 - テキスト選択時のダイアログ表示問題
 - 親子コンポーネント間のデータ同期問題
+- TypeScript型エラー（BaseEntityLine.vue、EntityDialogs.vue、VAnnotator.vue）
+- ビルドエラーの解決
 
 
 

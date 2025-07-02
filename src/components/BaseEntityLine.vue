@@ -29,12 +29,15 @@ import { computed } from 'vue';
 const props = defineProps({
   x1: {
     type: Number,
+    required: true,
   },
   x2: {
     type: Number,
+    required: true,
   },
   y: {
     type: Number,
+    required: true,
   },
   height: {
     type: Number,
@@ -42,6 +45,7 @@ const props = defineProps({
   },
   color: {
     type: String,
+    required: true,
   },
 });
 

@@ -3,7 +3,7 @@ import type { CandidateEntity } from '@/composables/useEntityCRUD'
 
 interface Props {
   candidateEntity: CandidateEntity
-  entityLabels: Array<{ id: number; text: string; color: string }>
+  entityLabels: Array<{ id: number; text: string; color?: string }>
   dialog4Adding: boolean
   dialog4Updating: boolean
   dialog4Deleting: boolean
@@ -48,17 +48,17 @@ defineEmits<Emits>()
           </div>
         </v-card>
 
-        <v-radio-group :model-value="candidateEntity.label" @update:model-value="$emit('updateCandidateEntityLabel', $event)" row class="mt-5">
+        <v-radio-group :model-value="candidateEntity.label" @update:model-value="$event !== null && $emit('updateCandidateEntityLabel', $event)" row class="mt-5">
           <v-radio
             v-for="sp in entityLabels"
             :key="sp.id"
             :label="`${sp.id}: ${sp.text}`"
             :value="sp.id"
-            :color="sp.color"
+            :color="sp.color || '#000000'"
             class="radio-button-custom"
           >
             <template v-slot:label>
-              <span class="radio-label" :style="{ color: sp.color }">
+              <span class="radio-label" :style="{ color: sp.color || '#000000' }">
                 {{ sp.id }}: {{ sp.text }}
               </span>
             </template>
@@ -150,17 +150,17 @@ defineEmits<Emits>()
           </div>
         </v-card>
 
-        <v-radio-group :model-value="candidateEntity.label" @update:model-value="$emit('updateCandidateEntityLabel', $event)" row class="mt-5">
+        <v-radio-group :model-value="candidateEntity.label" @update:model-value="$event !== null && $emit('updateCandidateEntityLabel', $event)" row class="mt-5">
           <v-radio
             v-for="sp in entityLabels"
             :key="sp.id"
             :label="`${sp.id}: ${sp.text}`"
             :value="sp.id"
-            :color="sp.color"
+            :color="sp.color || '#000000'"
             class="radio-button-custom"
           >
             <template v-slot:label>
-              <span class="radio-label" :style="{ color: sp.color }">
+              <span class="radio-label" :style="{ color: sp.color || '#000000' }">
                 {{ sp.id }}: {{ sp.text }}
               </span>
             </template>

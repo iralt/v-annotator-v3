@@ -187,7 +187,9 @@ watch(
   () => {
     heights.value = {};
     nextTick(() => {
-      font.value = Font.create(props.text, textElement.value);
+      if (textElement.value) {
+        font.value = Font.create(props.text, textElement.value);
+      }
       console.log("Font:", font.value, "*****************");
     });
   },
@@ -199,7 +201,7 @@ const items = computed((): VirtualScrollItem[] => {
     return [];
   }
 
-  return textLines.value.map((line, i) => {
+  return textLines.value.map((line, _i) => {
     const heightKey = `${line.startOffset}:${line.endOffset}`;
     const height = heights.value[heightKey] || 64;
     
@@ -267,7 +269,7 @@ const _text = computed((): Text => new Text(props.text));
 const entityLabelList = computed((): LabelList | null => {
   if (textElement.value) {
     const widths = props.entityLabels.map((label) =>
-      widthOf(label.text, textElement.value)
+      widthOf(label.text, textElement.value!)
     );
     return LabelList.valueOf(
       props.maxLabelLength,
@@ -282,7 +284,7 @@ const entityLabelList = computed((): LabelList | null => {
 const relationLabelList = computed((): LabelList | null => {
   if (textElement.value) {
     const widths = props.relationLabels.map((label) =>
-      widthOf(label.text, textElement.value)
+      widthOf(label.text, textElement.value!)
     );
     return LabelList.valueOf(
       props.maxLabelLength,
