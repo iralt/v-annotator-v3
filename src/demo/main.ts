@@ -4,7 +4,7 @@ import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import "vuetify/styles";
 import App from "./App.vue";
-// import VAnnotatorV3 from '../index'
+import VAnnotatorV3 from '../index'
 
 const vuetify = createVuetify({
   components,
@@ -13,5 +13,5 @@ const vuetify = createVuetify({
 
 const app = createApp(App);
 app.use(vuetify);
-// app.use(VAnnotatorV3)
+app.use(VAnnotatorV3)
 app.mount("#app");

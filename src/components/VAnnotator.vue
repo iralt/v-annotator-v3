@@ -1,0 +1,412 @@
+<!-- Template部分
+SVGマーカーの定義:
+コンポーネントはSVG要素を使用してカスタムマーカー（矢印など）を定義しています。これはテキスト内の関係を視覚的に示すために使用されることがあります。
+
+RecycleScrollerの使用:
+vue-virtual-scroller を使用して、パフォーマンスを向上させるために画面上に表示されるアイテムの数を最小限に抑えながら、多数のテキストラインをスクロール可能なリストとして表示しています。
+各アイテム（テキストライン）は v-line コンポーネントを使って表示され、それぞれのテキストラインに対応するエンティティや関係のデータを渡しています。
+
+イベントハンドリング:
+クリックやタッチイベントを通じて、特定のエンティティや関係がクリックされたときの動作を定義しています。 -->
+
+<template>
+  <div :id="`container-${uuid}`" @click="open" @touchend="open">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+      <defs>
+        <marker
+          id="v-annotator-arrow"
+          viewBox="0 0 10 10"
+          refX="5"
+          refY="5"
+          markerWidth="6"
+          markerHeight="6"
+          orient="auto-start-reverse"
+        >
+          <path d="M 0 0 L 10 5 L 0 10 z" stroke="#74b8dc" fill="#74b8dc" />
+        </marker>
+      </defs>
+    </svg>
+    <v-virtual-scroll :items="items">
+      <template v-slot:default="{ item, index }">
+        <!-- SSS -->
+        <!-- <div :id="`container-${uuid}`"> -->
+        <!-- AAAAA -->
+        <!-- <div :key="index"> -->
+        <!-- <p>{{ index }}: {{ item.textLine.startOffset }} - {{ item.textLine.endOffset }}</p> -->
+        <v-line
+          :annotator-uuid="uuid"
+          :dark="dark"
+          :entities="
+            entityList.filterByRange(
+              item.textLine.startOffset,
+              item.textLine.endOffset
+            )
+          "
+          :entityLabels="entityLabelList"
+          :relations="
+            relationList.filterByRange(
+              item.textLine.startOffset,
+              item.textLine.endOffset
+            )
+          "
+          :maxLabelLength="maxLabelLength"
+          :relationLabels="relationLabelList"
+          :font="font"
+          :rtl="rtl"
+          :selected-entities="highlightedEntities"
+          :selected-relation="selectedRelation"
+          :text="text"
+          :textLine="item.textLine"
+          :base-x="baseX"
+          :left="left"
+          :right="right"
+          :key="`${index}:${rtl}`"
+          @click:entity="clicked"
+          @click:relation="onRelationClicked"
+          @contextmenu:entity="
+            $emit('contextmenu:entity', $event, props.record)
+          "
+          @contextmenu:relation="$emit('contextmenu:relation', $event)"
+          @update:height="updateHeight"
+          @setSelectedEntity="selectedEntity = $event"
+          @setSelectedRelation="selectedRelation = $event"
+        />
+
+        <!-- </div> -->
+        <!-- </div> -->
+      </template>
+    </v-virtual-scroll>
+    <!-- MMEMO SVG要素を非表示にするが、DOMには存在させるよう調整 -->
+    <svg
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      style="position: absolute; opacity: 0; pointer-events: none"
+    >
+      <text :id="`text-${uuid}`" style="white-space: pre" />
+    </svg>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, watch, computed, nextTick, Ref } from "vue";
+import { debounce } from "lodash-es";
+import { v4 as uuidv4 } from "uuid";
+import VLine from "@/components/Vline.vue";
+// MTODO 他のを探さないといけない vue-virtual-scrollerは使えない？
+//// import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
+//// import { RecycleScroller } from 'vue-virtual-scroller';
+// import { VirtualScroller } from 'vue3-virtual-scroller'
+
+// import { Text, Label, Entity, Relation, Font, widthOf, TextLine, Entities, RelationList, LabelList, EntityLabelListItem, RelationLabelListItem, TextLineSplitter, LineWidthManager, TextSelector } from '@/domain';
+import { Text } from "@/composables/models/Label/Text";
+import {
+  EntityLabelListItem,
+  RelationLabelListItem,
+  LabelList,
+  Label,
+} from "@/composables/models/Label/Label";
+// MTODO Label, Relation,Entity はclassじゃなかった。別で定義必要かも。
+import {
+  RelationList,
+  Relation,
+  RelationListItem,
+} from "@/composables/models/Label/Relation";
+import { Entities, Entity } from "@/composables/models/Label/Entity";
+import { Font } from "@/composables/models/Line/Font";
+import { widthOf } from "@/composables/models/Line/Utils";
+import { TextLine } from "@/composables/models/Line/LineText";
+import { TextLineSplitter } from "@/composables/models/Line/LineSplitter";
+import { LineWidthManager } from "@/composables/models/Line/WidthManager";
+import { TextSelector } from "@/composables/models/EventHandler/TextSelectionHandler";
+
+// 型定義
+interface VAnnotatorProps {
+  record?: any;
+  maxLabelLength: number;
+  text: string;
+  entities: Entity[];
+  entityLabels: Label[];
+  relations: Relation[];
+  relationLabels: Label[];
+  allowOverlapping: boolean;
+  rtl: boolean;
+  graphemeMode: boolean;
+  dark: boolean;
+  selectedEntities: Entity[];
+  editFlag: boolean;
+}
+
+interface VirtualScrollItem {
+  id: string;
+  textLine: TextLine;
+  size: number;
+}
+
+const props = withDefaults(defineProps<VAnnotatorProps>(), {
+  record: undefined,
+  maxLabelLength: 10,
+  text: "",
+  entities: () => [],
+  entityLabels: () => [],
+  relations: () => [],
+  relationLabels: () => [],
+  allowOverlapping: false,
+  rtl: false,
+  graphemeMode: false,
+  dark: false,
+  selectedEntities: () => [],
+  editFlag: false,
+});
+
+// 親から呼ばれるメソッドを公開
+const updateFlag = (newFlag: boolean): void => {
+  console.log("Flag updated to:", newFlag);
+  console.log(
+    `%c*** newFlag *** ${newFlag}`,
+    "background-color:#de6; padding:6px; border-radius:4px;"
+  );
+  // フラグを更新するロジックをここに追加
+};
+
+// 親から呼ばれるメソッドを公開する
+defineExpose({
+  updateFlag,
+});
+
+const emits = defineEmits([
+  "click:entity",
+  "click:relation",
+  "contextmenu:entity",
+  "contextmenu:relation",
+  "add:entity",
+  "rendered",
+]);
+
+const uuid: string = uuidv4();
+const font: Ref<Font | null> = ref(null);
+const heights: Ref<Record<string, number>> = ref({});
+const maxWidth: Ref<number> = ref(-1);
+const baseX: Ref<number> = ref(0);
+const left: Ref<number> = ref(0);
+const right: Ref<number> = ref(0);
+const selectedRelation: Ref<RelationListItem | null> = ref(null);
+const selectedEntity: Ref<Entity | null> = ref(null);
+
+const textElement: Ref<SVGTextElement | null> = ref(null);
+
+onMounted(() => {
+  textElement.value = document.getElementById(`text-${uuid}`);
+  window.addEventListener("resize", setMaxWidth);
+  setMaxWidth();
+  console.log("items:", items.value);
+  console.log("Received text in VAnnotator:", props.text);
+});
+
+watch(
+  () => props.text,
+  () => {
+    heights.value = {};
+    nextTick(() => {
+      font.value = Font.create(props.text, textElement.value);
+      console.log("Font:", font.value, "*****************");
+    });
+  },
+  { immediate: true }
+);
+
+const items = computed((): VirtualScrollItem[] => {
+  // console.log('Computing items...');
+  if (!textLines.value || textLines.value.length === 0) {
+    // console.log('textLines is empty or undefined:', textLines.value);
+    return [];
+  }
+
+  // console.log(`Generating items from textLines, count: ${textLines.value.length}`);
+  return textLines.value.map((line, i) => {
+    const heightKey = `${line.startOffset}:${line.endOffset}`;
+    const height = heights.value[heightKey] || 64;
+    console.log(
+      `Item ${i}: startOffset = ${line.startOffset}, endOffset = ${line.endOffset}, height = ${height}`
+    );
+
+    // 描画完了時に親コンポーネントへ通知
+    // emits('rendered');
+    return {
+      id: heightKey,
+      textLine: line,
+      size: height,
+    };
+  });
+});
+
+const entityList = computed((): Entities => {
+  resetSelection();
+
+  console.log("Computing entityList...");
+  return props.graphemeMode
+    ? Entities.valueOf(props.entities, _text.value)
+    : Entities.valueOf(props.entities);
+});
+
+const relationList = computed((): RelationList => {
+  resetSelection();
+  return new RelationList(props.relations, entityList.value);
+});
+
+const rightOffeset: Ref<number> = ref(50);
+
+const textLines = computed((): TextLine[] => {
+  console.log("Computing textLines...");
+  console.log("Font:", font.value);
+  console.log("Entity Label List:", entityLabelList.value);
+  console.log("Max Width:", maxWidth.value);
+  if (!font.value || !entityLabelList.value || maxWidth.value === -1) {
+    console.log("One or more dependencies are not ready:", {
+      font: font.value,
+      entityLabelList: entityLabelList.value,
+      maxWidth: maxWidth.value,
+    });
+    return [];
+  } else {
+    const maxLabelWidth = entityLabelList.value.maxLabelWidth;
+    // console.log('Max Label Width:', maxLabelWidth);
+    const calculator = new LineWidthManager(
+      maxWidth.value + rightOffeset.value,
+      maxLabelWidth
+    );
+    const splitter = new TextLineSplitter(calculator, font.value);
+
+    // console.log('Splitting text with given font and widths...');
+    const lines = splitter.split(_text.value);
+    // console.log('Generated text lines:', lines);
+
+    return lines;
+  }
+});
+
+const _text = computed((): Text => new Text(props.text));
+
+const entityLabelList = computed((): LabelList | null => {
+  if (textElement.value) {
+    const widths = props.entityLabels.map((label) =>
+      widthOf(label.text, textElement.value)
+    );
+    return LabelList.valueOf(
+      props.maxLabelLength,
+      props.entityLabels,
+      widths,
+      EntityLabelListItem
+    );
+  }
+  return null;
+});
+
+const relationLabelList = computed((): LabelList | null => {
+  if (textElement.value) {
+    const widths = props.relationLabels.map((label) =>
+      widthOf(label.text, textElement.value)
+    );
+    return LabelList.valueOf(
+      props.maxLabelLength,
+      props.relationLabels,
+      widths,
+      RelationLabelListItem
+    );
+  }
+  return null;
+});
+
+const highlightedEntities = computed((): Entity[] => {
+  if (selectedEntity.value) {
+    return props.selectedEntities.concat(selectedEntity.value);
+  }
+  return props.selectedEntities;
+});
+
+function setMaxWidth(): void {
+  nextTick(
+    debounce(() => {
+      console.log(`Setting max width for container-${uuid}: ${maxWidth.value}`);
+      const containerElement = document.getElementById(`container-${uuid}`);
+
+      if (containerElement) {
+        const clientWidth = containerElement.clientWidth;
+        const rect = containerElement.getBoundingClientRect();
+
+        console.log(
+          `Container found: clientWidth = ${clientWidth}, rect =`,
+          rect
+        );
+
+        maxWidth.value = clientWidth;
+        left.value = rect.left;
+        right.value = rect.right - rect.left;
+        baseX.value = !props.rtl ? 0 : right.value;
+      } else {
+        console.log(`Container element for container-${uuid} not found`);
+      }
+    }, 500)
+  );
+}
+
+function clicked(event: Event, entity: Entity): void {
+  emits("click:entity", event, entity.id, props.record);
+}
+
+function onRelationClicked(event: Event, relation: RelationListItem): void {
+  emits("click:relation", event, relation);
+}
+
+function updateHeight(id: string, height: number): void {
+  heights.value[id] = height;
+}
+
+function resetSelection(): void {
+  selectedRelation.value = null;
+  selectedEntity.value = null;
+}
+
+function open(event: Event): void {
+  try {
+    console.log("entityList:", entityList.value);
+    // entityList.value.id2entity.forEach((entity, key) => {
+    //   console.log(`Entity ${key}:`, entity);
+    //   console.log('startOffset:', entity.startOffset);
+    // });
+    // console.log('_text:', _text.value);
+
+    // if (!event.shiftKey) {
+    //   console.log('Shift key is pressed. Exiting the function.');
+    //   return;
+    // }
+
+    const selector = new TextSelector(
+      props.allowOverlapping,
+      props.graphemeMode
+    );
+    const [startOffset, endOffset] = selector.getOffsets(
+      entityList.value,
+      _text.value
+    );
+    console.log(
+      "Emitting:",
+      startOffset,
+      endOffset,
+      _text.value.text,
+      props.record
+    );
+    // MMEMO 欲しいデータを渡す
+    emits(
+      "add:entity",
+      event,
+      startOffset,
+      endOffset,
+      _text.value.text,
+      props.record
+    );
+  } catch (e) {
+    console.log("Error while selecting text:", e);
+    return;
+  }
+}
+</script>

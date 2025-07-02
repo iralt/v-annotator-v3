@@ -1,0 +1,1 @@
+gh repo create iralt/${PWD##*/} --private --source ./ --push
