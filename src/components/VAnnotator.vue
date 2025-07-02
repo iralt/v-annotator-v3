@@ -42,13 +42,14 @@ import { TextLine } from "@/composables/models/Line/LineText";
 import { TextLineSplitter } from "@/composables/models/Line/LineSplitter";
 import { LineWidthManager } from "@/composables/models/Line/WidthManager";
 import { TextSelector } from "@/composables/models/EventHandler/TextSelectionHandler";
+import { useEntityCRUD, type EntityData } from "@/composables/useEntityCRUD";
 
 // 型定義
 interface VAnnotatorProps {
   record?: any;
   maxLabelLength?: number;
   text: string;
-  entities: Entity[];
+  entitiesData: EntityData[];
   entityLabels: Label[];
   relations: Relation[];
   relationLabels: Label[];
@@ -58,11 +59,6 @@ interface VAnnotatorProps {
   dark: boolean;
   selectedEntities: Entity[];
   editFlag: boolean;
-  // Entity CRUD props
-  candidateEntity?: any;
-  dialog4Adding?: boolean;
-  dialog4Updating?: boolean;
-  dialog4Deleting?: boolean;
 }
 
 interface VirtualScrollItem {
@@ -75,7 +71,7 @@ const props = withDefaults(defineProps<VAnnotatorProps>(), {
   record: undefined,
 
   text: "",
-  entities: () => [],
+  entitiesData: () => [],
   entityLabels: () => [],
   selectedEntities: () => [],
   relations: () => [],
@@ -88,12 +84,6 @@ const props = withDefaults(defineProps<VAnnotatorProps>(), {
   dark: false,
 
   editFlag: false,
-  
-  // Entity CRUD defaults
-  candidateEntity: () => ({}),
-  dialog4Adding: false,
-  dialog4Updating: false,
-  dialog4Deleting: false,
 });
 
 // 親から呼ばれるメソッドを公開
@@ -118,13 +108,7 @@ const emits = defineEmits([
   "contextmenu:relation",
   "add:entity",
   "rendered",
-  // Entity CRUD emits
-  "cancel",
-  "confirm",
-  "update-entity-add-prefix",
-  "update-entity-subtract-prefix", 
-  "update-entity-add-suffix",
-  "update-entity-subtract-suffix",
+  "update:entitiesData",
 ]);
 
 const uuid: string = uuidv7();
@@ -138,6 +122,48 @@ const selectedRelation: Ref<RelationListItem | null> = ref(null);
 const selectedEntity: Ref<Entity | null> = ref(null);
 
 const textElement: Ref<SVGTextElement | null> = ref(null);
+
+// Entity CRUD integration
+const entitiesDataRef = ref([...props.entitiesData]);
+const textRef = ref(props.text);
+const isUpdatingFromProp = ref(false);
+
+const {
+  entities,
+  candidateEntity,
+  addEntityWithDialog,
+  updateEntityWithDialog,
+  deleteEntityWithDialog,
+  updateEntityAddPrefix,
+  updateEntitySubtractPrefix,
+  updateEntityAddSuffix,
+  updateEntitySubtractSuffix,
+  confirmAction,
+  cancelAction,
+  dialog4Adding,
+  dialog4Updating,
+  dialog4Deleting,
+} = useEntityCRUD(entitiesDataRef, textRef);
+
+// Watch for prop changes and update refs
+watch(() => props.entitiesData, (newEntitiesData) => {
+  isUpdatingFromProp.value = true;
+  entitiesDataRef.value = [...newEntitiesData];
+  nextTick(() => {
+    isUpdatingFromProp.value = false;
+  });
+}, { deep: true, immediate: true });
+
+watch(() => props.text, (newText) => {
+  textRef.value = newText;
+});
+
+// Watch for internal entitiesData changes and emit to parent
+watch(entitiesDataRef, (newEntitiesData) => {
+  if (!isUpdatingFromProp.value) {
+    emits('update:entitiesData', [...newEntitiesData]);
+  }
+}, { deep: true });
 
 onMounted(() => {
   const element = document.getElementById(`text-${uuid}`);
@@ -188,10 +214,13 @@ const items = computed((): VirtualScrollItem[] => {
 const entityList = computed((): Entities => {
   resetSelection();
 
-  console.log("Computing entityList...");
+  console.log("Computing entityList...", entities.value, "entitiesDataRef:", entitiesDataRef.value);
+  // Ensure entities.value is always an array and contains valid Entity objects
+  const entityArray = Array.isArray(entities.value) ? entities.value : [];
+  console.log("Entity array to process:", entityArray);
   return props.graphemeMode
-    ? Entities.valueOf(props.entities, _text.value)
-    : Entities.valueOf(props.entities);
+    ? Entities.valueOf(entityArray, _text.value)
+    : Entities.valueOf(entityArray);
 });
 
 const relationList = computed((): RelationList => {
@@ -296,11 +325,21 @@ function setMaxWidth(): void {
 }
 
 function clicked(event: Event, entity: Entity): void {
+  // Call internal CRUD function for updating entity
+  updateEntityWithDialog(event, entity.id);
+  // Also emit for external listeners if needed
   emits("click:entity", event, entity.id, props.record);
 }
 
 function onRelationClicked(event: Event, relation: RelationListItem): void {
   emits("click:relation", event, relation);
+}
+
+function onEntityContextMenu(entity: Entity): void {
+  // Call internal CRUD function for deleting entity
+  deleteEntityWithDialog(entity);
+  // Also emit for external listeners if needed
+  emits("contextmenu:entity", entity, props.record);
 }
 
 function updateHeight(id: string, height: number): void {
@@ -335,13 +374,15 @@ function open(event: Event): void {
       _text.value
     );
     console.log(
-      "Emitting:",
+      "Calling addEntityWithDialog:",
       startOffset,
       endOffset,
       _text.value.text,
       props.record
     );
-    // MMEMO 欲しいデータを渡す
+    // Call internal CRUD function for adding entity
+    addEntityWithDialog(event, startOffset, endOffset, _text.value.text);
+    // Also emit for external listeners if needed
     emits(
       "add:entity",
       event,
@@ -411,9 +452,7 @@ function open(event: Event): void {
           :key="`${index}:${rtl}`"
           @click:entity="clicked"
           @click:relation="onRelationClicked"
-          @contextmenu:entity="
-            $emit('contextmenu:entity', $event, props.record)
-          "
+          @contextmenu:entity="onEntityContextMenu"
           @contextmenu:relation="$emit('contextmenu:relation', $event)"
           @update:height="updateHeight"
           @setSelectedEntity="selectedEntity = $event"
@@ -441,12 +480,13 @@ function open(event: Event): void {
       :dialog4-adding="dialog4Adding"
       :dialog4-updating="dialog4Updating"
       :dialog4-deleting="dialog4Deleting"
-      @cancel="emits('cancel')"
-      @confirm="(actionType) => emits('confirm', actionType)"
-      @update-entity-add-prefix="emits('update-entity-add-prefix')"
-      @update-entity-subtract-prefix="emits('update-entity-subtract-prefix')"
-      @update-entity-add-suffix="emits('update-entity-add-suffix')"
-      @update-entity-subtract-suffix="emits('update-entity-subtract-suffix')"
+      @cancel="cancelAction"
+      @confirm="confirmAction"
+      @update-entity-add-prefix="updateEntityAddPrefix"
+      @update-entity-subtract-prefix="updateEntitySubtractPrefix"
+      @update-entity-add-suffix="updateEntityAddSuffix"
+      @update-entity-subtract-suffix="updateEntitySubtractSuffix"
+      @update-candidate-entity-label="(value) => candidateEntity.label = value"
     />
   </div>
 </template>

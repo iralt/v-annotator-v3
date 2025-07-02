@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, reactive } from "vue";
 import VAnnotator from "@/components/VAnnotator.vue";
-import { useEntityCRUD } from "@/composables/useEntityCRUD";
 
 // Demo data
 const text = ref(
@@ -64,23 +63,6 @@ const relations = reactive([
 const relationLabels = reactive([
   //   { id: 0, text: "Rel_1", color: "#ffffff" },
 ]);
-
-const {
-  entities,
-  candidateEntity,
-  addEntityWithDialog,
-  updateEntityWithDialog,
-  deleteEntityWithDialog,
-  updateEntityAddPrefix,
-  updateEntitySubtractPrefix,
-  updateEntityAddSuffix,
-  updateEntitySubtractSuffix,
-  confirmAction,
-  cancelAction,
-  dialog4Adding,
-  dialog4Updating,
-  dialog4Deleting,
-} = useEntityCRUD(entitiesData, text);
 </script>
 
 <template>
@@ -102,30 +84,18 @@ const {
 
                 <v-annotator
                   :text="text"
-                  :entities="entities"
+                  :entities-data="entitiesData"
                   :entity-labels="entityLabels"
                   :selected-entities="selectedEntities"
                   :relations="relations"
                   :relation-labels="relationLabels"
                   :max-label-length="maxLabelLength"
-                  @add:entity="addEntityWithDialog"
-                  @click:entity="updateEntityWithDialog"
-                  @contextmenu:entity="deleteEntityWithDialog"
                   :allow-overlapping="allowOverlapping"
                   :grapheme-mode="graphemeMode"
                   :rtl="rtl"
                   :dark="false"
                   :edit-flag="true"
-                  :candidate-entity="candidateEntity"
-                  :dialog4-adding="dialog4Adding"
-                  :dialog4-updating="dialog4Updating"
-                  :dialog4-deleting="dialog4Deleting"
-                  @cancel="cancelAction"
-                  @confirm="confirmAction"
-                  @update-entity-add-prefix="updateEntityAddPrefix"
-                  @update-entity-subtract-prefix="updateEntitySubtractPrefix"
-                  @update-entity-add-suffix="updateEntityAddSuffix"
-                  @update-entity-subtract-suffix="updateEntitySubtractSuffix"
+                  @update:entitiesData="entitiesData = $event"
                 />
               </v-card-text>
             </v-card>

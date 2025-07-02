@@ -184,9 +184,12 @@ export function useEntityCRUD(
         dialogState.closeUpdatingDialog()
         break
       case 'delete':
+        console.log("Before delete - entitiesData:", entitiesData.value.length, "items")
+        console.log("Deleting entity with id:", candidateEntity.value.id)
         entitiesData.value = entitiesData.value.filter(
           (e) => e.id !== candidateEntity.value.id
         )
+        console.log("After delete - entitiesData:", entitiesData.value.length, "items")
         dialogState.closeDeletingDialog()
         console.log("deleted")
         break

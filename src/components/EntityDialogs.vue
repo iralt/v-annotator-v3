@@ -16,6 +16,7 @@ interface Emits {
   (e: 'updateEntitySubtractPrefix'): void
   (e: 'updateEntityAddSuffix'): void
   (e: 'updateEntitySubtractSuffix'): void
+  (e: 'updateCandidateEntityLabel', value: number): void
 }
 
 defineProps<Props>()
@@ -24,7 +25,7 @@ defineEmits<Emits>()
 
 <template>
   <!-- v-annotator dialogs -->
-  <v-dialog v-model="dialog4Adding" max-width="500">
+  <v-dialog :model-value="dialog4Adding" max-width="500">
     <v-card class="ma-3">
       <v-card-title class="text-h5"> 追加しますか？ </v-card-title>
       <v-card-subtitle>
@@ -47,7 +48,7 @@ defineEmits<Emits>()
           </div>
         </v-card>
 
-        <v-radio-group v-model="candidateEntity.label" row class="mt-5">
+        <v-radio-group :model-value="candidateEntity.label" @update:model-value="$emit('updateCandidateEntityLabel', $event)" row class="mt-5">
           <v-radio
             v-for="sp in entityLabels"
             :key="sp.id"
@@ -83,7 +84,7 @@ defineEmits<Emits>()
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="dialog4Updating" max-width="500">
+  <v-dialog :model-value="dialog4Updating" max-width="500">
     <v-card color="rgba(255, 255, 255, 1.0)" class="ma-3">
       <v-card-title class="text-h5"> 修正しますか？ </v-card-title>
       <v-card-subtitle>
@@ -149,7 +150,7 @@ defineEmits<Emits>()
           </div>
         </v-card>
 
-        <v-radio-group v-model="candidateEntity.label" row class="mt-5">
+        <v-radio-group :model-value="candidateEntity.label" @update:model-value="$emit('updateCandidateEntityLabel', $event)" row class="mt-5">
           <v-radio
             v-for="sp in entityLabels"
             :key="sp.id"
@@ -185,7 +186,7 @@ defineEmits<Emits>()
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="dialog4Deleting" max-width="500">
+  <v-dialog :model-value="dialog4Deleting" max-width="500">
     <v-card color="rgba(255, 255, 255, 0.85)" class="ma-3">
       <v-card-title class="text-h5"> 削除しますか？ </v-card-title>
       <v-card-subtitle>
