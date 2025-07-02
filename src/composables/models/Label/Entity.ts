@@ -3,12 +3,16 @@ import { Text } from "./Text";
 import { Identifiable } from "./Identifiable";
 
 export class Entity implements Identifiable {
+  readonly text?: string;
+
   constructor(
-    readonly id: number,
+    readonly id: number | string,
     readonly label: number,
     readonly startOffset: number,
-    readonly endOffset: number
+    readonly endOffset: number,
+    text?: string
   ) {
+    this.text = text;
     if (startOffset > endOffset) {
       throw new RangeError(
         `The startOffset(${startOffset}) must be smaller than endOffset(${endOffset}).`
@@ -55,11 +59,26 @@ export class Entity implements Identifiable {
   get center(): number {
     return this.startOffset + (this.endOffset - this.startOffset) / 2;
   }
+
+  /**
+   * Get the text content. Returns stored text if available, otherwise extracts from source text.
+   * @param {string} sourceText - The source text to extract from (optional if text is stored).
+   * @returns {string} - The text content.
+   */
+  getText(sourceText?: string): string {
+    if (this.text) {
+      return this.text;
+    }
+    if (!sourceText) {
+      throw new Error('Source text is required when entity text is not stored');
+    }
+    return sourceText.substring(this.startOffset, this.endOffset);
+  }
 }
 
 export class Entities {
   private tree: IntervalTree<Entity> = new IntervalTree();
-  private id2entity: Map<number, Entity> = new Map();
+  private id2entity: Map<number | string, Entity> = new Map();
 
   constructor(entities: Entity[]) {
     for (const entity of entities) {
@@ -95,10 +114,10 @@ export class Entities {
   /**
    * Returns the entity that matches the provided id.
    *   If no match is found, undefined is returned.
-   * @param {number} id - the entity id.
+   * @param {number | string} id - the entity id.
    * @returns {(Entity | undefined)} - Entity if match is found, otherwise undefined.
    */
-  findById(id: number): Entity | undefined {
+  findById(id: number | string): Entity | undefined {
     return this.id2entity.get(id)!;
   }
 

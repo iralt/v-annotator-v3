@@ -29,7 +29,7 @@ export class RelationLine {
   render(entities: GeometricEntity[], rtl: boolean): LineRelation[] {
     const lineRelations: LineRelation[] = [];
     this.levelManager.clear();
-    const entityMap: Map<number, GeometricEntity> = new Map();
+    const entityMap: Map<number | string, GeometricEntity> = new Map();
     entities.forEach((entity) => {
       entityMap.set(entity.entity.id, entity);
     });

@@ -3,7 +3,7 @@ import { Identifiable } from "../Label/Identifiable";
 
 export class LevelManager {
   private intervalPerLevel: IntervalTree[] = [];
-  private id2level: Map<number, number> = new Map(); // <id, level>
+  private id2level: Map<number | string, number> = new Map(); // <id, level>
 
   update(item: Identifiable, ranges: [number, number][]): void {
     for (const [level, tree] of this.intervalPerLevel.entries()) {
