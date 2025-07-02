@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, reactive } from "vue";
 import VAnnotator from "@/components/VAnnotator.vue";
-import EntityDialogs from "@/components/EntityDialogs.vue";
 import { useEntityCRUD } from "@/composables/useEntityCRUD";
 
 // Demo data
@@ -117,6 +116,16 @@ const {
                   :rtl="rtl"
                   :dark="false"
                   :edit-flag="true"
+                  :candidate-entity="candidateEntity"
+                  :dialog4-adding="dialog4Adding"
+                  :dialog4-updating="dialog4Updating"
+                  :dialog4-deleting="dialog4Deleting"
+                  @cancel="cancelAction"
+                  @confirm="confirmAction"
+                  @update-entity-add-prefix="updateEntityAddPrefix"
+                  @update-entity-subtract-prefix="updateEntitySubtractPrefix"
+                  @update-entity-add-suffix="updateEntityAddSuffix"
+                  @update-entity-subtract-suffix="updateEntitySubtractSuffix"
                 />
               </v-card-text>
             </v-card>
@@ -124,21 +133,6 @@ const {
             <pre>{{ entitiesData }}</pre>
           </v-col>
         </v-row>
-
-        <!-- Entity Dialogs Component -->
-        <EntityDialogs
-          :candidate-entity="candidateEntity"
-          :entity-labels="entityLabels"
-          :dialog4-adding="dialog4Adding"
-          :dialog4-updating="dialog4Updating"
-          :dialog4-deleting="dialog4Deleting"
-          @cancel="cancelAction"
-          @confirm="confirmAction"
-          @update-entity-add-prefix="updateEntityAddPrefix"
-          @update-entity-subtract-prefix="updateEntitySubtractPrefix"
-          @update-entity-add-suffix="updateEntityAddSuffix"
-          @update-entity-subtract-suffix="updateEntitySubtractSuffix"
-        />
       </v-container>
 
       <v-container>

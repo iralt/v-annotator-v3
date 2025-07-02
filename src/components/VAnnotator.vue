@@ -15,6 +15,7 @@ import { debounce } from "lodash-es";
 import { v7 as uuidv7 } from "uuid";
 // @ts-ignore
 import VLine from "@/components/Vline.vue";
+import EntityDialogs from "@/components/EntityDialogs.vue";
 // MTODO 他のを探さないといけない vue-virtual-scrollerは使えない？
 //// import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 //// import { RecycleScroller } from 'vue-virtual-scroller';
@@ -57,6 +58,11 @@ interface VAnnotatorProps {
   dark: boolean;
   selectedEntities: Entity[];
   editFlag: boolean;
+  // Entity CRUD props
+  candidateEntity?: any;
+  dialog4Adding?: boolean;
+  dialog4Updating?: boolean;
+  dialog4Deleting?: boolean;
 }
 
 interface VirtualScrollItem {
@@ -82,6 +88,12 @@ const props = withDefaults(defineProps<VAnnotatorProps>(), {
   dark: false,
 
   editFlag: false,
+  
+  // Entity CRUD defaults
+  candidateEntity: () => ({}),
+  dialog4Adding: false,
+  dialog4Updating: false,
+  dialog4Deleting: false,
 });
 
 // 親から呼ばれるメソッドを公開
@@ -106,6 +118,13 @@ const emits = defineEmits([
   "contextmenu:relation",
   "add:entity",
   "rendered",
+  // Entity CRUD emits
+  "cancel",
+  "confirm",
+  "update-entity-add-prefix",
+  "update-entity-subtract-prefix", 
+  "update-entity-add-suffix",
+  "update-entity-subtract-suffix",
 ]);
 
 const uuid: string = uuidv7();
@@ -413,5 +432,21 @@ function open(event: Event): void {
     >
       <text :id="`text-${uuid}`" style="white-space: pre" />
     </svg>
+    
+    <!-- Entity Dialogs -->
+    <EntityDialogs
+      v-if="candidateEntity && (dialog4Adding || dialog4Updating || dialog4Deleting)"
+      :candidate-entity="candidateEntity"
+      :entity-labels="entityLabels"
+      :dialog4-adding="dialog4Adding"
+      :dialog4-updating="dialog4Updating"
+      :dialog4-deleting="dialog4Deleting"
+      @cancel="emits('cancel')"
+      @confirm="(actionType) => emits('confirm', actionType)"
+      @update-entity-add-prefix="emits('update-entity-add-prefix')"
+      @update-entity-subtract-prefix="emits('update-entity-subtract-prefix')"
+      @update-entity-add-suffix="emits('update-entity-add-suffix')"
+      @update-entity-subtract-suffix="emits('update-entity-subtract-suffix')"
+    />
   </div>
 </template>
