@@ -1,0 +1,53 @@
+{
+  "name": "v-annotator-v3",
+  "version": "0.1.0",
+  "description": "Vue 3 annotation library with Vuetify",
+  "type": "module",
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "types": "./types/index.d.ts"
+    }
+  },
+  "files": [
+    "lib",
+    "types",
+    "README.md"
+  ],
+  "packageManager": "yarn@1.22.19",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && vue-tsc --declaration --emitDeclarationOnly --outDir types",
+    "build:demo": "vite build --mode demo --outDir dist-demo",
+    "preview": "vite preview",
+    "preview:demo": "vite preview --outDir dist-demo",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0",
+    "vuetify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0",
+    "vue": "^3.4.0",
+    "vue-tsc": "^2.0.0",
+    "vuetify": "^3.4.0"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "vuetify",
+    "annotation",
+    "library"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/v-annotator-v3.git"
+  }
+}
