@@ -9,88 +9,11 @@ vue-virtual-scroller を使用して、パフォーマンスを向上させる�
 イベントハンドリング:
 クリックやタッチイベントを通じて、特定のエンティティや関係がクリックされたときの動作を定義しています。 -->
 
-<template>
-  <div :id="`container-${uuid}`" @click="open" @touchend="open">
-    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="0" height="0">
-      <defs>
-        <marker
-          id="v-annotator-arrow"
-          viewBox="0 0 10 10"
-          refX="5"
-          refY="5"
-          markerWidth="6"
-          markerHeight="6"
-          orient="auto-start-reverse"
-        >
-          <path d="M 0 0 L 10 5 L 0 10 z" stroke="#74b8dc" fill="#74b8dc" />
-        </marker>
-      </defs>
-    </svg>
-    <v-virtual-scroll :items="items">
-      <template v-slot:default="{ item, index }">
-        <!-- SSS -->
-        <!-- <div :id="`container-${uuid}`"> -->
-        <!-- AAAAA -->
-        <!-- <div :key="index"> -->
-        <!-- <p>{{ index }}: {{ item.textLine.startOffset }} - {{ item.textLine.endOffset }}</p> -->
-        <v-line
-          :annotator-uuid="uuid"
-          :dark="dark"
-          :entities="
-            entityList.filterByRange(
-              item.textLine.startOffset,
-              item.textLine.endOffset
-            )
-          "
-          :entityLabels="entityLabelList"
-          :relations="
-            relationList.filterByRange(
-              item.textLine.startOffset,
-              item.textLine.endOffset
-            )
-          "
-          :maxLabelLength="maxLabelLength"
-          :relationLabels="relationLabelList"
-          :font="font"
-          :rtl="rtl"
-          :selected-entities="highlightedEntities"
-          :selected-relation="selectedRelation"
-          :text="text"
-          :textLine="item.textLine"
-          :base-x="baseX"
-          :left="left"
-          :right="right"
-          :key="`${index}:${rtl}`"
-          @click:entity="clicked"
-          @click:relation="onRelationClicked"
-          @contextmenu:entity="
-            $emit('contextmenu:entity', $event, props.record)
-          "
-          @contextmenu:relation="$emit('contextmenu:relation', $event)"
-          @update:height="updateHeight"
-          @setSelectedEntity="selectedEntity = $event"
-          @setSelectedRelation="selectedRelation = $event"
-        />
-
-        <!-- </div> -->
-        <!-- </div> -->
-      </template>
-    </v-virtual-scroll>
-    <!-- MMEMO SVG要素を非表示にするが、DOMには存在させるよう調整 -->
-    <svg
-      version="1.1"
-      xmlns="http://www.w3.org/2000/svg"
-      style="position: absolute; opacity: 0; pointer-events: none"
-    >
-      <text :id="`text-${uuid}`" style="white-space: pre" />
-    </svg>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted, watch, computed, nextTick, Ref } from "vue";
 import { debounce } from "lodash-es";
-import { v4 as uuidv4 } from "uuid";
+import { v7 as uuidv7 } from "uuid";
+// @ts-ignore
 import VLine from "@/components/Vline.vue";
 // MTODO 他のを探さないといけない vue-virtual-scrollerは使えない？
 //// import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
@@ -122,7 +45,7 @@ import { TextSelector } from "@/composables/models/EventHandler/TextSelectionHan
 // 型定義
 interface VAnnotatorProps {
   record?: any;
-  maxLabelLength: number;
+  maxLabelLength?: number;
   text: string;
   entities: Entity[];
   entityLabels: Label[];
@@ -144,17 +67,20 @@ interface VirtualScrollItem {
 
 const props = withDefaults(defineProps<VAnnotatorProps>(), {
   record: undefined,
-  maxLabelLength: 10,
+
   text: "",
   entities: () => [],
   entityLabels: () => [],
+  selectedEntities: () => [],
   relations: () => [],
   relationLabels: () => [],
+  maxLabelLength: () => 10,
   allowOverlapping: false,
-  rtl: false,
   graphemeMode: false,
+  rtl: false,
+
   dark: false,
-  selectedEntities: () => [],
+
   editFlag: false,
 });
 
@@ -182,7 +108,7 @@ const emits = defineEmits([
   "rendered",
 ]);
 
-const uuid: string = uuidv4();
+const uuid: string = uuidv7();
 const font: Ref<Font | null> = ref(null);
 const heights: Ref<Record<string, number>> = ref({});
 const maxWidth: Ref<number> = ref(-1);
@@ -195,7 +121,8 @@ const selectedEntity: Ref<Entity | null> = ref(null);
 const textElement: Ref<SVGTextElement | null> = ref(null);
 
 onMounted(() => {
-  textElement.value = document.getElementById(`text-${uuid}`);
+  const element = document.getElementById(`text-${uuid}`);
+  textElement.value = element as SVGTextElement | null;
   window.addEventListener("resize", setMaxWidth);
   setMaxWidth();
   console.log("items:", items.value);
@@ -410,3 +337,81 @@ function open(event: Event): void {
   }
 }
 </script>
+
+<template>
+  <div :id="`container-${uuid}`" @click="open" @touchend="open">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+      <defs>
+        <marker
+          id="v-annotator-arrow"
+          viewBox="0 0 10 10"
+          refX="5"
+          refY="5"
+          markerWidth="6"
+          markerHeight="6"
+          orient="auto-start-reverse"
+        >
+          <path d="M 0 0 L 10 5 L 0 10 z" stroke="#74b8dc" fill="#74b8dc" />
+        </marker>
+      </defs>
+    </svg>
+    <v-virtual-scroll :items="items">
+      <template v-slot:default="{ item, index }">
+        <!-- SSS -->
+        <!-- <div :id="`container-${uuid}`"> -->
+        <!-- AAAAA -->
+        <!-- <div :key="index"> -->
+        <!-- <p>{{ index }}: {{ item.textLine.startOffset }} - {{ item.textLine.endOffset }}</p> -->
+        <v-line
+          :annotator-uuid="uuid"
+          :dark="dark"
+          :entities="
+            entityList.filterByRange(
+              item.textLine.startOffset,
+              item.textLine.endOffset
+            )
+          "
+          :entityLabels="entityLabelList"
+          :relations="
+            relationList.filterByRange(
+              item.textLine.startOffset,
+              item.textLine.endOffset
+            )
+          "
+          :maxLabelLength="maxLabelLength"
+          :relationLabels="relationLabelList"
+          :font="font"
+          :rtl="rtl"
+          :selected-entities="highlightedEntities"
+          :selected-relation="selectedRelation"
+          :text="text"
+          :textLine="item.textLine"
+          :base-x="baseX"
+          :left="left"
+          :right="right"
+          :key="`${index}:${rtl}`"
+          @click:entity="clicked"
+          @click:relation="onRelationClicked"
+          @contextmenu:entity="
+            $emit('contextmenu:entity', $event, props.record)
+          "
+          @contextmenu:relation="$emit('contextmenu:relation', $event)"
+          @update:height="updateHeight"
+          @setSelectedEntity="selectedEntity = $event"
+          @setSelectedRelation="selectedRelation = $event"
+        />
+
+        <!-- </div> -->
+        <!-- </div> -->
+      </template>
+    </v-virtual-scroll>
+    <!-- MMEMO SVG要素を非表示にするが、DOMには存在させるよう調整 -->
+    <svg
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      style="position: absolute; opacity: 0; pointer-events: none"
+    >
+      <text :id="`text-${uuid}`" style="white-space: pre" />
+    </svg>
+  </div>
+</template>

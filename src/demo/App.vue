@@ -1,29 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, reactive } from "vue";
-import { v4 as uuidv7 } from "uuid";
+import { v7 as uuidv7 } from "uuid";
 import VAnnotator from "@/components/VAnnotator.vue";
-import DialogTest from "@/components/DialogTest.vue";
 
-const itemId = ref(1);
 const text = ref(
   "ここ数年ずっと言われているんですけれども、やっぱり吉田正尚の後を打つバッターですね、和田さん。特にオリックス打線の方が少し点を取る意味では苦しんでいるということもあるんですけれども。ロッテは5番の、ファーストの、レアードから始まります。"
 );
-
-const allowOverlapping = ref<boolean>(true); // 重なりを許可するかどうか
-const graphemeMode = ref<boolean>(false);
-const rtl = ref<boolean>(false);
-
-const candidateEntity = ref<{
-  id?: string;
-  startOffset?: number;
-  endOffset?: number;
-  label?: number;
-  user?: number;
-  text?: string;
-}>({});
-const dialog4Adding = ref<boolean>(false);
-const dialog4Updating = ref<boolean>(false);
-const dialog4Deleting = ref<boolean>(false);
 
 // sample data
 const entities = ref([
@@ -66,8 +48,37 @@ const entityLabels = ref([
   { id: 8, text: "その他", color: "#607D8B" },
 ]);
 
+const maxLabelLength = ref(10);
+const allowOverlapping = ref<boolean>(true); // 重なりを許可するかどうか
+const graphemeMode = ref<boolean>(false);
+const rtl = ref<boolean>(false);
+
+const candidateEntity = ref<{
+  id?: string;
+  startOffset?: number;
+  endOffset?: number;
+  label?: number;
+  user?: number;
+  text?: string;
+}>({
+  id: "",
+  startOffset: 0,
+  endOffset: 0,
+  label: 1,
+  user: 1,
+  text: "",
+});
+const dialog4Adding = ref<boolean>(false);
+const dialog4Updating = ref<boolean>(false);
+const dialog4Deleting = ref<boolean>(false);
+
 //// Adding, Updating, Deleting Entities ////////
-const addEntity = (event, startOffset, endOffset, text) => {
+const addEntity = (
+  event: any,
+  startOffset: number,
+  endOffset: number,
+  text: string
+) => {
   console.log("parent addEntity", startOffset, endOffset, text);
   dialog4Adding.value = true;
   candidateEntity.value = {
@@ -188,17 +199,6 @@ const relations = reactive([
 const relationLabels = reactive([
   //   { id: 0, text: "Rel_1", color: "#ffffff" },
 ]);
-
-const message = ref("");
-const dialogVisible = ref(false);
-
-const showMessage = () => {
-  message.value = "V-Annotator V3 ライブラリが正常に動作しています！";
-};
-
-const openDialog = () => {
-  dialogVisible.value = true;
-};
 </script>
 
 <template>
@@ -215,48 +215,43 @@ const openDialog = () => {
                 <p>
                   開発中のコンポーネントやプラグインの動作確認に使用します。
                 </p>
-                <div class="d-flex gap-2 flex-wrap">
-                  <v-btn color="primary" @click="showMessage">
-                    テストボタン
-                  </v-btn>
-                  <v-btn color="secondary" @click="openDialog">
-                    ダイアログを開く
-                  </v-btn>
-                </div>
-                <v-alert v-if="message" type="success" class="mt-4">
-                  {{ message }}
-                </v-alert>
 
                 <hr class="my-4" />
 
                 <v-annotator
-                  :claim-id="itemId"
                   :text="text"
                   :entities="entities"
                   :entity-labels="entityLabels"
                   :selected-entities="selectedEntities"
+                  :relations="relations"
+                  :relation-labels="relationLabels"
+                  :max-label-length="maxLabelLength"
                   @add:entity="addEntity"
                   @click:entity="updateEntity"
                   @contextmenu:entity="deleteEntity"
                   :allow-overlapping="allowOverlapping"
                   :grapheme-mode="graphemeMode"
-                  :relations="relations"
-                  :relation-labels="relationLabels"
                   :rtl="rtl"
                 />
               </v-card-text>
             </v-card>
+
+            <v-radio-group>
+              <v-radio label="Radio One" value="one"></v-radio>
+              <v-radio label="Radio Two" value="two"></v-radio>
+              <v-radio label="Radio Three" value="three"></v-radio>
+            </v-radio-group>
           </v-col>
         </v-row>
 
         <!-- v-annotator dialogs -->
         <v-dialog v-model="dialog4Adding" max-width="500">
-          <v-card color="rgba(255, 255, 255, 0.85)" class="ma-3">
+          <v-card class="ma-3">
             <v-card-title class="text-h5"> 追加しますか？ </v-card-title>
             <v-card-subtitle>
               追加する場合は、ラベルを選んで、<v-btn
-                color="green"
-                variant="tonal"
+                color="primary"
+                variant="flat"
                 size="small"
                 ><b>追加</b></v-btn
               >
@@ -279,8 +274,14 @@ const openDialog = () => {
                   :key="sp.id"
                   :label="`${sp.id}: ${sp.text}`"
                   :value="sp.id"
-                  color="blue"
+                  :color="sp.color"
+                  class="radio-button-custom"
                 >
+                  <template v-slot:label>
+                    <span class="radio-label" :style="{ color: sp.color }">
+                      {{ sp.id }}: {{ sp.text }}
+                    </span>
+                  </template>
                 </v-radio>
               </v-radio-group>
             </v-card-text>
@@ -293,8 +294,8 @@ const openDialog = () => {
               </v-btn>
 
               <v-btn
-                color="green darken-1"
-                variant="tonal"
+                color="primary"
+                variant="flat"
                 @click="confirmAddingEntity"
               >
                 追加
@@ -375,8 +376,14 @@ const openDialog = () => {
                   :key="sp.id"
                   :label="`${sp.id}: ${sp.text}`"
                   :value="sp.id"
-                  color="blue"
+                  :color="sp.color"
+                  class="radio-button-custom"
                 >
+                  <template v-slot:label>
+                    <span class="radio-label" :style="{ color: sp.color }">
+                      {{ sp.id }}: {{ sp.text }}
+                    </span>
+                  </template>
                 </v-radio>
               </v-radio-group>
             </v-card-text>
@@ -443,7 +450,7 @@ const openDialog = () => {
       <v-container>
         <v-row>
           <v-col cols="12">
-            <v-card>
+            <v-card color="rgba(200, 200, 255, 0.2)">
               <v-card-title>V-Annotator 操作方法</v-card-title>
               <v-card-text>
                 <v-list>
@@ -515,22 +522,64 @@ const openDialog = () => {
         </v-row>
       </v-container>
     </v-main>
-
-    <DialogTest
-      v-model="dialogVisible"
-      title="テストダイアログ"
-      max-width="600px"
-    >
-      <p>これはV-Annotator V3のダイアログコンポーネントです。</p>
-      <p>
-        ボタンを押すことで表示され、外部のアプリケーションからもimportして使用できます。
-      </p>
-      <template #actions>
-        <v-btn color="grey" @click="dialogVisible = false"> キャンセル </v-btn>
-        <v-btn color="primary" @click="dialogVisible = false"> OK </v-btn>
-      </template>
-    </DialogTest>
   </v-app>
 </template>
 
-<style scoped></style>
+<style scoped>
+.radio-button-custom {
+  margin: 8px 0;
+}
+
+.radio-button-custom :deep(.v-selection-control) {
+  opacity: 1 !important;
+}
+
+.radio-button-custom :deep(.v-selection-control__input) {
+  opacity: 1 !important;
+}
+
+.radio-button-custom :deep(.v-selection-control__wrapper) {
+  opacity: 1 !important;
+}
+
+.radio-button-custom :deep(.v-radio) {
+  opacity: 1 !important;
+}
+
+.radio-button-custom :deep(.v-selection-control-group__input) {
+  opacity: 1 !important;
+}
+
+/* ラジオボタンの円形部分 */
+.radio-button-custom :deep(.v-selection-control__input > .v-icon) {
+  opacity: 1 !important;
+  color: currentColor !important;
+  font-size: 20px !important;
+}
+
+/* チェックされていない状態 */
+.radio-button-custom
+  :deep(.v-selection-control:not(.v-selection-control--dirty) .v-icon) {
+  color: #666 !important;
+  opacity: 0.8 !important;
+}
+
+/* チェックされた状態 */
+.radio-button-custom :deep(.v-selection-control--dirty .v-icon) {
+  color: currentColor !important;
+  opacity: 1 !important;
+}
+
+/* より具体的なセレクタでアイコンを強制表示 */
+.radio-button-custom :deep(.mdi-radiobox-marked),
+.radio-button-custom :deep(.mdi-radiobox-blank) {
+  opacity: 1 !important;
+  color: currentColor !important;
+}
+
+.radio-label {
+  font-weight: 500;
+  font-size: 14px;
+  margin-left: 8px;
+}
+</style>
