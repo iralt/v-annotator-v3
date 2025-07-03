@@ -237,6 +237,17 @@ const relationList = computed((): RelationList => {
 const textLines = computed((): TextLine[] => {
   console.log("Computing textLines...");
   console.log("Font:", font.value);
+  if (!font.value) {
+    console.warn("Font is null, attempting to initialize...");
+    // フォントがnullの場合は初期化を試行
+    nextTick(() => {
+      if (textElement.value) {
+        font.value = Font.create(props.text, textElement.value);
+        console.log("Font initialized:", font.value);
+      }
+    });
+    return [];
+  }
   console.log("Entity Label List:", entityLabelList.value);
   console.log("Max Width:", maxWidth.value);
   if (!font.value || !entityLabelList.value || maxWidth.value === -1) {
