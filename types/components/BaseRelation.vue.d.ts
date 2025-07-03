@@ -1,0 +1,33 @@
+declare const _default: import("vue").DefineComponent<{}, {
+    rtl: boolean;
+    dark: boolean;
+    selected: boolean;
+    openLeft: boolean;
+    openRight: boolean;
+    label?: string | undefined;
+    marker?: string | undefined;
+    level?: number | undefined;
+    x1?: number | undefined;
+    x2?: number | undefined;
+    margin?: number | undefined;
+    fontSize?: number | undefined;
+    labelWidth?: number | undefined;
+    maxLevel?: number | undefined;
+    $props: {
+        readonly rtl?: boolean | undefined;
+        readonly dark?: boolean | undefined;
+        readonly selected?: boolean | undefined;
+        readonly openLeft?: boolean | undefined;
+        readonly openRight?: boolean | undefined;
+        readonly label?: string | undefined;
+        readonly marker?: string | undefined;
+        readonly level?: number | undefined;
+        readonly x1?: number | undefined;
+        readonly x2?: number | undefined;
+        readonly margin?: number | undefined;
+        readonly fontSize?: number | undefined;
+        readonly labelWidth?: number | undefined;
+        readonly maxLevel?: number | undefined;
+    };
+}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").PublicProps, Readonly<{}> & Readonly<{}>, {}, {}, {}, {}, string, import("vue").ComponentProvideOptions, true, {}, any>;
+export default _default;

@@ -20,7 +20,7 @@
   "packageManager": "yarn@1.22.19",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vue-tsc --declaration --emitDeclarationOnly --outDir types",
+    "build": "vite build && vue-tsc --project tsconfig.build.json",
     "build:demo": "vite build --mode demo --outDir dist-demo",
     "preview": "vite preview",
     "preview:demo": "vite preview --outDir dist-demo",

@@ -1,0 +1,36 @@
+declare const _default: import("vue").DefineComponent<{}, {
+    $emit: (event: "click:entity" | "click:relation" | "contextmenu:entity" | "contextmenu:relation" | "update:height" | "setSelectedEntity" | "setSelectedRelation", ...args: any[]) => void;
+    rtl: boolean;
+    dark: boolean;
+    text?: string | undefined;
+    entityLabels?: Record<string, any> | undefined;
+    relations?: unknown[] | undefined;
+    relationLabels?: Record<string, any> | undefined;
+    selectedEntities?: unknown[] | undefined;
+    entities?: unknown[] | undefined;
+    font?: Record<string, any> | undefined;
+    baseX?: number | undefined;
+    left?: number | undefined;
+    right?: number | undefined;
+    selectedRelation?: Record<string, any> | undefined;
+    textLine?: Record<string, any> | undefined;
+    annotatorUuid?: string | undefined;
+    $props: {
+        readonly rtl?: boolean | undefined;
+        readonly dark?: boolean | undefined;
+        readonly text?: string | undefined;
+        readonly entityLabels?: Record<string, any> | undefined;
+        readonly relations?: unknown[] | undefined;
+        readonly relationLabels?: Record<string, any> | undefined;
+        readonly selectedEntities?: unknown[] | undefined;
+        readonly entities?: unknown[] | undefined;
+        readonly font?: Record<string, any> | undefined;
+        readonly baseX?: number | undefined;
+        readonly left?: number | undefined;
+        readonly right?: number | undefined;
+        readonly selectedRelation?: Record<string, any> | undefined;
+        readonly textLine?: Record<string, any> | undefined;
+        readonly annotatorUuid?: string | undefined;
+    };
+}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").PublicProps, Readonly<{}> & Readonly<{}>, {}, {}, {}, {}, string, import("vue").ComponentProvideOptions, true, {}, any>;
+export default _default;
