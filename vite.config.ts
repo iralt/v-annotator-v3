@@ -4,7 +4,7 @@ import { resolve } from "path";
 
 export default defineConfig(({ command }) => {
   const alias = {
-    "@": resolve(__dirname, "src"),
+    // "@": resolve(__dirname, "src"),
   };
 
   if (command === "serve") {

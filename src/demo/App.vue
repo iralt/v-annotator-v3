@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, reactive } from "vue";
-import VAnnotator from "@/components/VAnnotator.vue";
+import VAnnotator from "../components/VAnnotator.vue";
 
 // Demo data
 const text = ref(
