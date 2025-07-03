@@ -84,10 +84,11 @@ import { VAnnotator } from 'v-annotator-v3'
       :selected-entities="selectedEntities"
       :relations="relations"
       :relation-labels="relationLabels"
-      :max-label-length="maxLabelLength"
-      :allow-overlapping="allowOverlapping"
-      :grapheme-mode="graphemeMode"
-      :rtl="rtl"
+      :max-label-length="config.maxLabelLength"
+      :allow-overlapping="config.allowOverlapping"
+      :grapheme-mode="config.graphemeMode"
+      :rtl="config.rtl"
+      :right-offeset="config.rightOffeset"
       :dark="false"
       :edit-flag="true"
       @update:entitiesData="entitiesData = $event"
@@ -99,7 +100,7 @@ import { VAnnotator } from 'v-annotator-v3'
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive, computed } from 'vue'
 
 const text = ref("吉田正尚選手は優秀な野球選手です。")
 
@@ -120,11 +121,14 @@ const entityLabels = ref([
   { id: 3, text: "組織名", color: "#FF5722" }
 ])
 
-
-const maxLabelLength = ref(10);
-const allowOverlapping = ref<boolean>(true);
-const graphemeMode = ref<boolean>(false);
-const rtl = ref<boolean>(false);
+// 設定をまとめたオブジェクト
+const config = reactive({
+  maxLabelLength: 10,
+  allowOverlapping: true,
+  graphemeMode: false,
+  rtl: false,
+  rightOffeset: 50,
+});
 
 const selectedEntities = computed(() => {
   return [];

@@ -48,11 +48,13 @@ const entityLabels = ref([
   { id: 8, text: "その他", color: "#607D8B" },
 ]);
 
-const maxLabelLength = ref(10);
-const allowOverlapping = ref<boolean>(true);
-const graphemeMode = ref<boolean>(false);
-const rtl = ref<boolean>(false);
-const rightOffeset = ref<number>(50);
+const config = reactive({
+  maxLabelLength: 10,
+  allowOverlapping: true,
+  graphemeMode: false,
+  rtl: false,
+  rightOffeset: 50,
+});
 
 const selectedEntities = computed(() => {
   return [];
@@ -91,13 +93,13 @@ const relationLabels = reactive([
                   :selected-entities="selectedEntities"
                   :relations="relations"
                   :relation-labels="relationLabels"
-                  :max-label-length="maxLabelLength"
-                  :allow-overlapping="allowOverlapping"
-                  :grapheme-mode="graphemeMode"
-                  :rtl="rtl"
+                  :max-label-length="config.maxLabelLength"
+                  :allow-overlapping="config.allowOverlapping"
+                  :grapheme-mode="config.graphemeMode"
+                  :rtl="config.rtl"
                   :dark="false"
                   :edit-flag="true"
-                  :right-offeset="rightOffeset"
+                  :right-offeset="config.rightOffeset"
                   @update:entitiesData="entitiesData = $event"
                 />
               </v-card-text>
@@ -149,29 +151,32 @@ const relationLabels = reactive([
                     <template v-slot:prepend>
                       <v-icon color="warning">mdi-cog</v-icon>
                     </template>
+
+                    <hr class="my-4" />
+
                     <v-list-item-title>設定オプション</v-list-item-title>
                     <v-list-item-subtitle>
                       <v-switch
-                        v-model="allowOverlapping"
+                        v-model="config.allowOverlapping"
                         label="重なりを許可"
                         density="compact"
                         hide-details
                       />
                       <v-switch
-                        v-model="graphemeMode"
+                        v-model="config.graphemeMode"
                         label="グラフェームモード"
                         density="compact"
                         hide-details
                       />
                       <v-switch
-                        v-model="rtl"
+                        v-model="config.rtl"
                         label="右から左（RTL）"
                         density="compact"
                         hide-details
                       />
                       <div class="mt-3">
                         <v-slider
-                          v-model="rightOffeset"
+                          v-model="config.rightOffeset"
                           label="右余白"
                           :min="0"
                           :max="200"
