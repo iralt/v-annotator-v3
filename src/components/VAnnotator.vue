@@ -238,7 +238,7 @@ const textLines = computed((): TextLine[] => {
   console.log("Computing textLines...");
   console.log("Font:", font.value);
   if (!font.value) {
-    console.warn("Font is null, attempting to initialize...");
+    console.warn("Font is null, attempting to initialize.");
     // フォントがnullの場合は初期化を試行
     nextTick(() => {
       if (textElement.value) {
