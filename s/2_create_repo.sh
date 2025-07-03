@@ -1,1 +1,1 @@
-gh repo create iralt/${PWD##*/} --private --source ./ --push
+gh repo create iralt/${PWD##*/} --public --source ./ --push

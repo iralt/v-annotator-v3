@@ -36,10 +36,14 @@ lerna-debug.log*
 
 # OS generated files
 Thumbs.db
+.DS_Store
 
 # Temporary files
 *.tmp
 *.temp
+
+# Claude Code
+.claude/
 
 # Coverage directory used by tools like istanbul
 coverage/
