@@ -1,6 +1,6 @@
 import { ref, computed, type Ref } from 'vue'
 import { useDialogState } from './useDialogState'
-import { Entity } from '@/composables/models/Label/Entity'
+import { Entity } from './models/Label/Entity'
 import { v7 as uuidv7 } from 'uuid'
 
 export interface EntityData {

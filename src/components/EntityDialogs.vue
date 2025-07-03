@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CandidateEntity } from '@/composables/useEntityCRUD'
+import type { CandidateEntity } from '../composables/useEntityCRUD'
 
 interface Props {
   candidateEntity: CandidateEntity

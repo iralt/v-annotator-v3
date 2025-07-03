@@ -1,4 +1,4 @@
-import config from "@/composables/models/Config/Config";
+import config from "../Config/Config";
 import { Identifiable } from "./Identifiable";
 
 export interface Label {

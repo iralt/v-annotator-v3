@@ -92,12 +92,12 @@ import BaseEntity from './BaseEntity.vue';
 import BaseText from './BaseText.vue';
 import BaseRelation from './BaseRelation.vue';
 // import { Entity } from "@/composables/models/Label/Entity";
-import { RelationListItem } from "@/composables/models/Label/Relation";
-import { Font } from "@/composables/models/Line/Font";
-import { LabelList } from "@/composables/models/Label/Label";
-import { TextLine } from "@/composables/models/Line/LineText";
-import { EntityLine, GeometricEntity } from "@/composables/models/Line/LineEntity";
-import { RelationLine } from "@/composables/models/Line/LineRelation";
+import { RelationListItem } from "../composables/models/Label/Relation";
+import { Font } from "../composables/models/Line/Font";
+import { LabelList } from "../composables/models/Label/Label";
+import { TextLine } from "../composables/models/Line/LineText";
+import { EntityLine, GeometricEntity } from "../composables/models/Line/LineEntity";
+import { RelationLine } from "../composables/models/Line/LineRelation";
 // MTODO interface LineRelation 
 
 const props = defineProps({

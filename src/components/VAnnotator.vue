@@ -12,31 +12,31 @@ import { ref, onMounted, watch, computed, nextTick, Ref } from "vue";
 import { debounce } from "lodash-es";
 import { v7 as uuidv7 } from "uuid";
 // @ts-ignore
-import VLine from "@/components/Vline.vue";
-import EntityDialogs from "@/components/EntityDialogs.vue";
+import VLine from "./Vline.vue";
+import EntityDialogs from "./EntityDialogs.vue";
 
 // import { Text, Label, Entity, Relation, Font, widthOf, TextLine, Entities, RelationList, LabelList, EntityLabelListItem, RelationLabelListItem, TextLineSplitter, LineWidthManager, TextSelector } from '@/domain';
-import { Text } from "@/composables/models/Label/Text";
+import { Text } from "../composables/models/Label/Text";
 import {
   EntityLabelListItem,
   RelationLabelListItem,
   LabelList,
   Label,
-} from "@/composables/models/Label/Label";
+} from "../composables/models/Label/Label";
 // MTODO Label, Relation,Entity はclassじゃなかった。別で定義必要かも。
 import {
   RelationList,
   Relation,
   RelationListItem,
-} from "@/composables/models/Label/Relation";
-import { Entities, Entity } from "@/composables/models/Label/Entity";
-import { Font } from "@/composables/models/Line/Font";
-import { widthOf } from "@/composables/models/Line/Utils";
-import { TextLine } from "@/composables/models/Line/LineText";
-import { TextLineSplitter } from "@/composables/models/Line/LineSplitter";
-import { LineWidthManager } from "@/composables/models/Line/WidthManager";
-import { TextSelector } from "@/composables/models/EventHandler/TextSelectionHandler";
-import { useEntityCRUD, type EntityData } from "@/composables/useEntityCRUD";
+} from "../composables/models/Label/Relation";
+import { Entities, Entity } from "../composables/models/Label/Entity";
+import { Font } from "../composables/models/Line/Font";
+import { widthOf } from "../composables/models/Line/Utils";
+import { TextLine } from "../composables/models/Line/LineText";
+import { TextLineSplitter } from "../composables/models/Line/LineSplitter";
+import { LineWidthManager } from "../composables/models/Line/WidthManager";
+import { TextSelector } from "../composables/models/EventHandler/TextSelectionHandler";
+import { useEntityCRUD, type EntityData } from "../composables/useEntityCRUD";
 
 // 型定義
 interface VAnnotatorProps {

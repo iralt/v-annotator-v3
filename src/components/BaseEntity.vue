@@ -49,8 +49,8 @@ import BaseEntityText from './BaseEntityText.vue';
 import BaseEntityLine from './BaseEntityLine.vue';
 // import { useRanges } from '@/composables/useRanges';
 // import { useConfig } from '@/composables/useConfig';
-import { Ranges } from "@/composables/models/Line/LineEntity";
-import config from "@/composables/models/Config/Config";
+import { Ranges } from "../composables/models/Line/LineEntity";
+import config from "../composables/models/Config/Config";
 
 // MTODO
 // ひとまずこのファイルだけでも動かしたいからここで使うものを持ってきてみる
