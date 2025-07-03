@@ -109,6 +109,8 @@ const emits = defineEmits([
 
 const uuid: string = uuidv7();
 const font: Ref<Font | null> = ref(null);
+const fontLoading: Ref<boolean> = ref(false);
+const fontLoadingError: Ref<string | null> = ref(null);
 const heights: Ref<Record<string, number>> = ref({});
 const maxWidth: Ref<number> = ref(-1);
 const baseX: Ref<number> = ref(0);
@@ -118,6 +120,31 @@ const selectedRelation: Ref<RelationListItem | null> = ref(null);
 const selectedEntity: Ref<Entity | null> = ref(null);
 
 const textElement: Ref<SVGTextElement | null> = ref(null);
+
+// Simplified font loading - sync only for reliability
+const loadFont = (): void => {
+  if (!textElement.value || !props.text) {
+    return;
+  }
+
+  fontLoading.value = true;
+  fontLoadingError.value = null;
+
+  try {
+    font.value = Font.createSync(props.text, textElement.value);
+    console.log("✅ SVG font loaded:", {
+      fontFamily: font.value.fontFamily,
+      fontSize: font.value.fontSize,
+      characterCount: font.value.width.size
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown font loading error';
+    console.error("❌ Font loading failed:", error);
+    fontLoadingError.value = `Font loading failed: ${errorMessage}`;
+  } finally {
+    fontLoading.value = false;
+  }
+};
 
 // Entity CRUD integration
 const entitiesDataRef = ref([...props.entitiesData]);
@@ -188,7 +215,7 @@ watch(
     nextTick(() => {
       console.log("watch text nextTick ----------");
       if (textElement.value) {
-        font.value = Font.createSync(props.text, textElement.value);
+        loadFont();
       }
       console.log("Font x:", font.value, "*****************");
     });
@@ -239,11 +266,16 @@ const textLines = computed((): TextLine[] => {
   console.log("Computing textLines...");
   console.log("Font:", font.value);
   if (!font.value) {
+    if (fontLoading.value) {
+      console.log("Font is loading, waiting...");
+      return [];
+    }
+    
     console.warn("Font is null, attempting to initialize.");
     // フォントがnullの場合は初期化を試行
     nextTick(() => {
       if (textElement.value) {
-        font.value = Font.createSync(props.text, textElement.value);
+        loadFont();
         console.log("Font initialized:", font.value);
       }
     });
@@ -416,6 +448,18 @@ function open(event: Event): void {
 
 <template>
   <div :id="`container-${uuid}`" @click="open" @touchend="open">
+    <!-- Font loading status indicator (development mode) -->
+    <div v-if="(fontLoading || fontLoadingError)" 
+         class="v-annotator-font-status" style="margin-bottom: 8px; font-size: 12px; opacity: 0.8;">
+      <div v-if="fontLoading" class="v-annotator-loading-indicator">
+        ⏳ Loading fonts for SVG text...
+      </div>
+      <div v-if="fontLoadingError" class="v-annotator-font-error">
+        <div class="v-annotator-font-error-message">
+          ⚠️ Font loading error: {{ fontLoadingError }}
+        </div>
+      </div>
+    </div>
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="0" height="0">
       <defs>
         <marker
@@ -497,7 +541,7 @@ function open(event: Event): void {
       @update-entity-add-suffix="updateEntityAddSuffix"
       @update-entity-subtract-suffix="updateEntitySubtractSuffix"
       @update-candidate-entity-label="
-        (value) => (candidateEntity.label = value)
+        (value: number) => (candidateEntity.label = value)
       "
     />
   </div>
