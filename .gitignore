@@ -45,6 +45,9 @@ Thumbs.db
 # Claude Code
 .claude/
 
+# Development scripts
+s/
+
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov

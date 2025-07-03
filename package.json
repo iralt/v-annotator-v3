@@ -50,7 +50,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/v-annotator-v3.git"
+    "url": "git+https://github.com/iralt/v-annotator-v3.git"
   },
   "dependencies": {
     "@flatten-js/interval-tree": "^1.1.3",
