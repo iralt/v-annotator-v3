@@ -186,10 +186,11 @@ watch(
   () => {
     heights.value = {};
     nextTick(() => {
+      console.log("watch text nextTick ----------");
       if (textElement.value) {
-        font.value = Font.create(props.text, textElement.value);
+        font.value = Font.createSync(props.text, textElement.value);
       }
-      console.log("Font:", font.value, "*****************");
+      console.log("Font x:", font.value, "*****************");
     });
   },
   { immediate: true }
@@ -242,7 +243,7 @@ const textLines = computed((): TextLine[] => {
     // フォントがnullの場合は初期化を試行
     nextTick(() => {
       if (textElement.value) {
-        font.value = Font.create(props.text, textElement.value);
+        font.value = Font.createSync(props.text, textElement.value);
         console.log("Font initialized:", font.value);
       }
     });

@@ -1,0 +1,72 @@
+/* Font loading optimizations for v-annotator */
+
+/* Material Design Icons optimization */
+@font-face {
+  font-family: 'Material Design Icons';
+  font-display: swap;
+  src: local('Material Design Icons');
+}
+
+/* Material Icons optimization */
+@font-face {
+  font-family: 'Material Icons';
+  font-display: swap;
+  src: local('Material Icons');
+}
+
+/* Font preloading for commonly used system fonts */
+@font-face {
+  font-family: 'Roboto';
+  font-display: swap;
+  src: local('Roboto');
+}
+
+@font-face {
+  font-family: 'Arial';
+  font-display: swap;
+  src: local('Arial');
+}
+
+@font-face {
+  font-family: 'Helvetica';
+  font-display: swap;
+  src: local('Helvetica');
+}
+
+@font-face {
+  font-family: 'Noto Sans';
+  font-display: swap;
+  src: local('Noto Sans');
+}
+
+@font-face {
+  font-family: 'Noto Sans CJK JP';
+  font-display: swap;
+  src: local('Noto Sans CJK JP');
+}
+
+/* Ensure smooth font loading for annotation text */
+.v-annotator-text {
+  font-display: swap;
+}
+
+/* Prevent layout shift during font loading */
+.v-annotator-container {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize icon rendering */
+.v-icon {
+  font-display: swap;
+}
+
+/* Prevent flash of unstyled text during font loading */
+.v-annotator-loading {
+  visibility: hidden;
+}
+
+.v-annotator-loaded {
+  visibility: visible;
+}

@@ -4,11 +4,11 @@ declare const _default: import("vue").DefineComponent<{}, {
     dark: boolean;
     text?: string | undefined;
     entityLabels?: Record<string, any> | undefined;
+    font?: Record<string, any> | undefined;
     relations?: unknown[] | undefined;
     relationLabels?: Record<string, any> | undefined;
     selectedEntities?: unknown[] | undefined;
     entities?: unknown[] | undefined;
-    font?: Record<string, any> | undefined;
     baseX?: number | undefined;
     left?: number | undefined;
     right?: number | undefined;
@@ -20,11 +20,11 @@ declare const _default: import("vue").DefineComponent<{}, {
         readonly dark?: boolean | undefined;
         readonly text?: string | undefined;
         readonly entityLabels?: Record<string, any> | undefined;
+        readonly font?: Record<string, any> | undefined;
         readonly relations?: unknown[] | undefined;
         readonly relationLabels?: Record<string, any> | undefined;
         readonly selectedEntities?: unknown[] | undefined;
         readonly entities?: unknown[] | undefined;
-        readonly font?: Record<string, any> | undefined;
         readonly baseX?: number | undefined;
         readonly left?: number | undefined;
         readonly right?: number | undefined;

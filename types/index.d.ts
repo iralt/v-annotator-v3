@@ -2,6 +2,7 @@ import type { App } from 'vue';
 import VAnnotator from './components/VAnnotator.vue';
 import EntityDialogs from './components/EntityDialogs.vue';
 export type { EntityData, CandidateEntity } from './composables/useEntityCRUD';
+export * from './composables/utils/fontUtils';
 export interface VAnnotatorV3Options {
 }
 export declare const VAnnotatorV3: {

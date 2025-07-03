@@ -7,5 +7,6 @@ export declare class Font {
     constructor(fontSize: number, fontFamily: string, fontWeight: string, lineHeight: number, width: Map<string, number>);
     widthOf(text: string, return_max?: boolean): number;
     widthOfChar(ch: string): number;
-    static create(text: string, textElement: SVGTextElement): Font;
+    static create(text: string, textElement: SVGTextElement): Promise<Font>;
+    static createSync(text: string, textElement: SVGTextElement): Font;
 }
