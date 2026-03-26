@@ -20,12 +20,25 @@ interface Emits {
 }
 
 defineProps<Props>()
-defineEmits<Emits>()
+const emit = defineEmits<Emits>()
+
+const handleDialogClose = (value: boolean) => {
+  // v-dialog が false（閉じる）方向に動いたときだけ発火させる
+  if (!value) {
+    emit('cancel')
+  }
+}
 </script>
 
 <template>
   <!-- v-annotator dialogs -->
-  <v-dialog :model-value="dialog4Adding" max-width="500">
+  <v-dialog
+    :model-value="dialog4Adding"
+    max-width="800"
+    @update:model-value="handleDialogClose"
+    @click:outside="() => emit('cancel')"
+    @keydown.esc.stop.prevent="() => emit('cancel')"
+  >
     <v-card class="ma-3">
       <v-card-title class="text-h5"> 追加しますか？ </v-card-title>
       <v-card-subtitle>
@@ -84,7 +97,13 @@ defineEmits<Emits>()
     </v-card>
   </v-dialog>
 
-  <v-dialog :model-value="dialog4Updating" max-width="500">
+  <v-dialog
+    :model-value="dialog4Updating"
+    max-width="800"
+    @update:model-value="handleDialogClose"
+    @click:outside="() => emit('cancel')"
+    @keydown.esc.stop.prevent="() => emit('cancel')"
+  >
     <v-card color="rgba(255, 255, 255, 1.0)" class="ma-3">
       <v-card-title class="text-h5"> 修正しますか？ </v-card-title>
       <v-card-subtitle>
@@ -186,7 +205,13 @@ defineEmits<Emits>()
     </v-card>
   </v-dialog>
 
-  <v-dialog :model-value="dialog4Deleting" max-width="500">
+  <v-dialog
+    :model-value="dialog4Deleting"
+    max-width="800"
+    @update:model-value="handleDialogClose"
+    @click:outside="() => emit('cancel')"
+    @keydown.esc.stop.prevent="() => emit('cancel')"
+  >
     <v-card color="rgba(255, 255, 255, 0.85)" class="ma-3">
       <v-card-title class="text-h5"> 削除しますか？ </v-card-title>
       <v-card-subtitle>
